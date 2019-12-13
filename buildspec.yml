@@ -2,12 +2,13 @@ version: 0.2
 phases:
   install:
     commands:
-      # Install kubectl
+      # Install kubectl according to your EKS cluster version
       - curl -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
       - mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
       - kubectl version --short --client
-      # Configure kubectl
+      # Create kubeconfig file for your EKS cluster 
+      # replace region and name values
       - aws eks --region eu-west-1 update-kubeconfig --name eksdev
   build:
     commands:
