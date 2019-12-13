@@ -11,4 +11,4 @@ phases:
       - aws eks --region eu-west-1 update-kubeconfig --name eksdev
   build:
     commands:
-      - kubectl apply -f deployment/ 
+      - kubectl apply -f deploy 
