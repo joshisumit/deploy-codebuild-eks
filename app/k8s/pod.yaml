@@ -1,0 +1,25 @@
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: nginx 
+  labels: 
+    app: nginx 
+spec: 
+  containers: 
+  - name: nginx 
+    image: nginx #ecrimage
+    ports: 
+    - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: eks-svc
+spec: 
+  selector: 
+    app: nginx
+  ports:
+    - name: web
+      port: 80
+      targetPort: 5000
+  type: LoadBalancer

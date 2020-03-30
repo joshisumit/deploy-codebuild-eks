@@ -2,14 +2,33 @@ version: 0.2
 phases:
   install:
     commands:
-      # Install kubectl according to your EKS cluster version
-      - curl -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/kubectl
+      #1. To assume a IAM role in CodeBuild build, uncomment below lines and replace role name
+      # Create ~/.aws/config file and set the role which needs to be assumed
+      # - mkdir -p ~/.aws/
+      # - echo "[profile anotheracc]" >> ~/.aws/config
+      # - echo "role_arn = arn:aws:iam::$AWS_ACCOUNT_ID:role/ToolsAcctCodePipelineKubernetesRole" >> ~/.aws/config
+      # - echo "credential_source = EcsContainer" >> ~/.aws/config
+      # - cat ~/.aws/config
+      # - aws sts get-caller-identity --profile anotheracc
+      #2. Install kubectl according to your EKS cluster version
+      - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/darwin/amd64/kubectl
       - chmod +x ./kubectl
       - mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
       - kubectl version --short --client
-      # Create kubeconfig file for your EKS cluster 
-      # replace region and name values
-      - aws eks --region eu-west-1 update-kubeconfig --name eksdev
+      #3. Create kubeconfig file for your EKS cluster, replace region and name values
+      #3a. If role is direcly mentioned, uncomment below line and replace role_arn
+      #- aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name $EKS_CLUSTER_NAME --role-arn <role_arn>
+      - aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name $EKS_CLUSTER_NAME --profile anotheracc
+      - cat ~/.kube/config
+      #4. Set the image tag
+      - export TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
   build:
     commands:
-      - kubectl apply -f deploy 
+      - kubectl get svc
+      #1. Build Image and push to ECR
+      #- cd app
+      #- docker build -t $ECR_REPO_URI:$TAG .
+      #- $(aws ecr get-login --no-include-email)
+      #- docker push $ECR_REPO_URI:$TAG
+      #2. deploy newer app
+      #- kubectl apply -f k8s/
